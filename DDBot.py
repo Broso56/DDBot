@@ -346,4 +346,4 @@ async def profile(interaction: discord.Interaction, player: str):
 
 
 
-client.run(token)
+client.run(token) # NOTE: If you want to test the bot yourself, you have to use your own client token. Don't give your client token to anyone.
