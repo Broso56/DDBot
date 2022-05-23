@@ -1,0 +1,16 @@
+DDNet Bot - Ideas:
+
+• Profile Summary
+    - Tracks Map Statistics, Like Finishes on Certain Difficulties, World Records, Top 5s, Team Ranks, etc.
+    - Tracks Point Statistics, Like Total Points, Points in the last year, Avg points per day/week/month.
+    - Tracks Misc Statistics, Like Favorite Partners, DDNet Birthday, Last Finishes, Finishes per month.(?)
+
+• Map Finder
+    - Able to search for maps directly
+    - Able to pull up a random map (either of a random difficulty as well or a pre-defined difficulty.)
+    - Able to search for the most finished map you don't have finished (of a certain difficulty, or overall), probably able to search under other parameters as well.
+
+• Party Maker <-- Inspired by Meeu's "Nobot" Discord Bot. 
+    - Able to set up a party/group in discord for certain map(s).
+    - Creates a private Text Channel & VC for group members (likely set to expire after 12-24h, or maybe x hours of inactivity.)
+    
