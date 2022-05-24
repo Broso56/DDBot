@@ -1,5 +1,3 @@
-# NOTE: Currently switching to cogs, as of right now the bot likely does not fully work yet. 
-
 from bottoken import token # Client token. NEVER share this with anyone, as it gives them access to your bot.
 import discord
 from discord.ext import commands
