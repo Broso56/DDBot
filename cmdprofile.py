@@ -1,4 +1,5 @@
 import discord
+import math
 from discord.ui import Button, View, Select
 from discord import app_commands
 from discord.ext import commands
@@ -12,22 +13,19 @@ intents.members = True
 intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 
-class UserProfile(commands.Cog): # Cog initiation
-    def __init__(self, client):
-        self.client = client
 
-    @client.tree.command(name="profile", description='A summary for a DDNet profile.')
-    async def profile(self, interaction: discord.Interaction, player: str):
-        global em
-        user = interaction.user
-        player_name = player
 
-        li_top5 = []
-        li_top1 = []
-        li_maps_fin = []
-        li_map_total = []
 
-        categories = { # Map difficulties/categories
+def scrape():
+    global categories, li_top5, li_top1, li_maps_fin, li_map_total # Map Statistics
+    global points_total, points_rank, points_lm, points_lw, pointavg_lm, pointavg_lw # Point Statistics
+
+    li_top5 = []
+    li_top1 = []
+    li_maps_fin = []
+    li_map_total = []
+
+    categories = { # Map difficulties/categories
                 0 : 'Novice',
                 1 : 'Moderate',
                 2 : 'Brutal',
@@ -40,52 +38,77 @@ class UserProfile(commands.Cog): # Cog initiation
                 9 : 'Fun'
             }
 
-        player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
-        url = f'https://ddnet.tw/players/?json2={player_url}'
+    player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
+    url = f'https://ddnet.tw/players/?json2={player_url}'
+    data = requests.get(url).json()
 
-        data = requests.get(url).json()
-        i = 0
-        while i <= 9: # Loop to sort through the data for each category
+    points_total = data['points']['points']
+    points_rank = data['points']['rank']
+    points_lm = data['points_last_month']['points'] # lm = last month
+    points_lw = data['points_last_week']['points'] # lw = last week
+    pointavg_lm = points_lm / 30
+    pointavg_lw = points_lw / 7
+    
+    # Rounds the decimals to full number // Removes the last 2 numbers (e.g So it shows as 1 instead of 1.0 cause it does that for some reason)
+    pointavg_lm = str(round(pointavg_lm, 0))[:-2]
+    pointavg_lw = str(round(pointavg_lw, 0))[:-2]
 
-            # Searches in the current category for maps
-            cat = categories[i]
-            category = data['types'][cat]
-            maps = category['maps']
-            map_total = len(maps)
+    i = 0
+    while i <= 9: # Loop to sort through the data for each category
+        # Searches in the current category for maps
+        cat = categories[i]
+        category = data['types'][cat]
+        maps = category['maps']
+        map_total = len(maps)
 
-            maps_name = []
-            maps_unfin = 0
-            maps_fin = 0
-            m = 0
-            top5 = 0
-            top1 = 0
+        maps_name = []
+        maps_unfin = 0
+        maps_fin = 0
+        m = 0
+        top5 = 0
+        top1 = 0 
 
-            # Getting the name of all the maps in x category for later use
-            for map in maps:
-                maps_name.append(map)
+        for map in maps: # Getting the name of all the maps in x category for later use
+            maps_name.append(map)
 
-            # Searches in those maps for details (rank, finishes, etc)
-            for __map__ in maps:
-                name = maps_name[m]
+        for __map__ in maps: # Searches in those maps for details (rank, finishes, etc)
+            name = maps_name[m]
+            if 'rank' not in maps[name]: # There is no 'rank' key for maps that you have not finished.
+                maps_unfin += 1
 
-                if 'rank' not in maps[name]: # There is no 'rank' key for maps that you have not finished.
-                    maps_unfin += 1
-                else: # If there is a 'rank' key then you've beaten the map before.
-                    maps_fin += 1
-                    rank = maps[name]['rank'] # To see what rank you are
-                    if rank <= 5: # Checks if you're in the top5
-                        top5 += 1
-                        if rank == 1: # Checks if you hold the current rank 1
-                            top1 += 1
-                m += 1
-            print(f'{cat} Finished: {maps_fin}/{map_total}\nTop5s: {top5}\nTop1s: {top1}') # For testing if the scraping works
+            else: # If there is a 'rank' key then you've beaten the map before.
+                maps_fin += 1
+                rank = maps[name]['rank'] # To see what rank you are
 
-            li_top5.append(top5)
-            li_top1.append(top1)
-            li_maps_fin.append(maps_fin)
-            li_map_total.append(map_total)
+                if rank <= 5: # Checks if you're in the top5
+                    top5 += 1
 
-            i += 1
+                    if rank == 1: # Checks if you hold the current rank 1
+                        top1 += 1
+            m += 1
+
+        print(f'{cat} Finished: {maps_fin}/{map_total}\nTop5s: {top5}\nTop1s: {top1}') # For testing if the scraping works
+
+        li_top5.append(top5)
+        li_top1.append(top1)
+        li_maps_fin.append(maps_fin)
+        li_map_total.append(map_total)
+        i += 1
+
+
+
+
+class UserProfile(commands.Cog): # Cog initiation
+    def __init__(self, client):
+        self.client = client
+
+    @client.tree.command(name="profile", description='A summary for a DDNet profile.')
+    async def profile(self, interaction: discord.Interaction, player: str):
+        global em, player_name
+        user = interaction.user
+        player_name = player
+
+        scrape()
 
 
         i = 0
@@ -111,13 +134,13 @@ class UserProfile(commands.Cog): # Cog initiation
             timestamp=datetime.datetime.now()
         )
 
-        em_point.add_field(name='Total Points:', value='UNKNOWN (Rank: UNKNOWN)')
+        em_point.add_field(name='Total Points:', value=f'{points_total} (Rank: {points_rank})')
         em_point.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_point.add_field(name='Points (365d):', value='UNKNOWN')
-        em_point.add_field(name='Points (7d):', value='UNKNOWN')
+        em_point.add_field(name='Points (30d):', value=f'{points_lm}')
+        em_point.add_field(name='Points (7d):', value=f'{points_lw}')
         em_point.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_point.add_field(name='Avg Points per Day (365d):', value='UNKNOWN')
-        em_point.add_field(name='Avg Points per Day (7d):', value='UNKNOWN')
+        em_point.add_field(name='Avg Points per Day (30d):', value=f'{pointavg_lm}')
+        em_point.add_field(name='Avg Points per Day (7d):', value=f'{pointavg_lw}')
 
         # Button/Dropdown Initiations. Buttons are for the 'pages', specifically in 'Map Statistics'.
         button1 = (Button(label='<<', style=discord.ButtonStyle.primary)) # Button 1 brings you to the FIRST page

@@ -1,5 +1,5 @@
-from bottoken import token # Client token. NEVER share this with anyone, as it gives them access to your bot.
-import discord
+from clienttoken import token # Client token. NEVER share this with anyone, as it gives them access to your bot.
+import discord                      # ^ Changed file name from 'bottoken' to 'clienttoken' locally to avoid my token file from being tracked + committed
 from discord.ext import commands
 import datetime
 import pytz
