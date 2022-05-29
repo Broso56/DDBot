@@ -1,5 +1,4 @@
 import discord
-import math
 from discord.ui import Button, View, Select
 from discord import app_commands
 from discord.ext import commands
@@ -294,7 +293,7 @@ class UserProfile(commands.Cog): # Cog initiation
 
         em = 0
 
-        async def button1_callback(interaction): # Edits the embed to 'go back' to the FIRST page. Disables the 'back' buttons and Enables the 'forward' buttons.
+        async def button1_callback(interaction): # Edits the embed to go to the FIRST page. Disables the 'back' buttons and Enables the 'forward' buttons.
             global em
             button1.disabled = True
             button2.disabled = True
