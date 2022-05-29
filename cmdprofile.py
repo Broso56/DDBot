@@ -3,7 +3,7 @@ import math
 from discord.ui import Button, View, Select
 from discord import app_commands
 from discord.ext import commands
-from datetime import date, datetime
+from datetime import datetime
 import asyncio
 import requests # To connect to site
 import urllib.parse # To convert text to user encoded url (e.g a space is now '%20')
@@ -14,9 +14,8 @@ intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 
 
-
-
 def scrape(): # Web Scrapes + Sorts Data
+    global data
     player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
     url = f'https://ddnet.tw/players/?json2={player_url}'
     data = requests.get(url).json()
@@ -38,7 +37,7 @@ def scrape(): # Web Scrapes + Sorts Data
     def FavoritePartner():
         global li_fp_names, li_fp_finishes
 
-        fp = data['favoritePartners']
+        fp = data['favoritePartners'] # fp = Favorite Partner
         li_fp_names = []
         li_fp_finishes = []
         i = 0
@@ -53,6 +52,9 @@ def scrape(): # Web Scrapes + Sorts Data
 
             i += 1
 
+        li_fp_names = li_fp_names[:-7]
+        li_fp_finishes = li_fp_finishes[:-7]
+
     def JoinDate():
         global bday, ff_date
 
@@ -61,6 +63,7 @@ def scrape(): # Web Scrapes + Sorts Data
         ff_date = datetime.fromtimestamp(ff_date) #ff = first finish
         ff_month = ff_date.month
         ff_day = ff_date.day
+        ff_date = f'<t:{int(datetime.timestamp(ff_date))}:R>'
 
         current_year = datetime.now().year
         player_birthday = datetime(current_year, ff_month, ff_day)
@@ -74,10 +77,11 @@ def scrape(): # Web Scrapes + Sorts Data
         days_til_bday = int(str(days_til_bday.days).replace('-', ''))
 
         if days_til_bday == 0:
-            bday = f'It\'s {player_name}\'s DDNet Birthday today!'
+            bday = f'`It\'s {player_name}\'s DDNet Birthday today!`'
 
         else:
-            bday = f'{days_til_bday} until {player_name}\'s birthday.'
+            player_birthday = datetime.timestamp(player_birthday)
+            bday = f'<t:{int(player_birthday)}:R>'
 
     def MapStats():
         global categories, li_top5, li_top1, li_maps_fin, li_map_total
@@ -135,16 +139,55 @@ def scrape(): # Web Scrapes + Sorts Data
                             top1 += 1
                 m += 1
 
-        li_top5.append(top5)
-        li_top1.append(top1)
-        li_maps_fin.append(maps_fin)
-        li_map_total.append(map_total)
-        i += 1
+            i += 1
+            li_top5.append(top5)
+            li_top1.append(top1)
+            li_maps_fin.append(maps_fin)
+            li_map_total.append(map_total)
+
+    def LastSeen():
+        global li_lf_ts, li_lf_map, li_lf_type, types
+        types = {
+            'Novice' : 'https://ddnet.tw/ranks/novice/',
+            'Moderate' : 'https://ddnet.tw/ranks/moderate/',
+            'Brutal' : 'https://ddnet.tw/ranks/brutal/',
+            'Insane' : 'https://ddnet.tw/ranks/insane/',
+            'Dummy' : 'https://ddnet.tw/ranks/dummy/',
+            'DDMaX' : 'https://ddnet.tw/ranks/ddmax/',
+            'Oldschool' : 'https://ddnet.tw/ranks/oldschool/',
+            'Solo' : 'https://ddnet.tw/ranks/solo/',
+            'Race' : 'https://ddnet.tw/ranks/race/',
+            'Fun' : 'https://ddnet.tw/ranks/fun/',
+        }
+        lf = data['last_finishes'] # lf = Last Finishes
+        li_lf_ts = []
+        li_lf_map = []
+        li_lf_type = []
+
+        i = 0
+        for f in lf:
+
+            lf_ts = lf[i]['timestamp'] # ts = timestamp
+            lf_map = lf[i]['map']
+            lf_type = lf[i]['type']
+
+            lf_ts = f'<t:{int(lf_ts)}:R>'
+
+            li_lf_ts.append(lf_ts)
+            li_lf_map.append(lf_map)
+            li_lf_type.append(lf_type)
+
+            i += 1
+
+        li_lf_ts = li_lf_ts[:-7]
+        li_lf_map = li_lf_map[:-7]
+        li_lf_type = li_lf_type[:-7] 
 
     PointStats()
     MapStats()
     FavoritePartner()
     JoinDate()
+    LastSeen()
 
 
 class UserProfile(commands.Cog): # Cog initiation
@@ -156,52 +199,70 @@ class UserProfile(commands.Cog): # Cog initiation
         global em, player_name
         user = interaction.user
         player_name = player
+        player_url = f'https://ddnet.tw/players/{player_name}'
 
         scrape()
-
-
-        i = 0
-        userava = user.avatar # Avatar that appears in top right of embeds
+        em = 0
+        thumbnail = user.avatar # Avatar that appears in top right of embeds
 
         em_map = discord.Embed( # Embed initiation for Map Statistics
-            title=f'{categories[i]} Map Statistics for {player_name}', 
-            description=f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})',
+            title=f'{categories[em]} Map Statistics for {player_name}', 
+            description=f'[`{player_name}\'s Profile`]({player_url})',
             timestamp=datetime.now()
             )
 
-        em_map.add_field(name=f'{categories[i]} Maps Completed:', value=f'{li_maps_fin[i]}/{li_map_total[i]}', inline=False)
+        em_map.add_field(name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
         em_map.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_map.add_field(name='Global Top 5s:', value=f'{li_top5[i]}', inline=True)
-        em_map.add_field(name='World Records:', value=f'{li_top1[i]}', inline=True)
+        em_map.add_field(name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
+        em_map.add_field(name='World Records:', value=f'{li_top1[em]}', inline=True)
         em_map.set_author(name=f'Reqeusted by {user.name}')
-        em_map.set_thumbnail(url=userava)
+        em_map.set_thumbnail(url=thumbnail)
 
 
         em_point = discord.Embed( # Embed initiation for Point Statistics
             title=f'Point Statistics for {player_name}',
-            description=f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})',
+            description=f'[`{player_name}\'s Profile`]({player_url})',
             timestamp=datetime.now()
         )
 
-        em_point.add_field(name='Total Points:', value=f'{points_total} (Rank: {points_rank})')
+        em_point.add_field(name='Total Points:', value=f'`{points_total}` (Rank: `{points_rank}`)')
         em_point.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_point.add_field(name='Points (30d):', value=f'{points_lm}')
-        em_point.add_field(name='Points (7d):', value=f'{points_lw}')
+        em_point.add_field(name='Points (30d):', value=f'`{points_lm}`')
+        em_point.add_field(name='Points (7d):', value=f'`{points_lw}`')
         em_point.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_point.add_field(name='Avg Points per Day (30d):', value=f'{pointavg_lm}')
-        em_point.add_field(name='Avg Points per Day (7d):', value=f'{pointavg_lw}')
+        em_point.add_field(name='Avg Points per Day (30d):', value=f'`{pointavg_lm}`')
+        em_point.add_field(name='Avg Points per Day (7d):', value=f'`{pointavg_lw}`')
+        em_point.set_author(name=f'Reqeusted by {user.name}')
+        em_point.set_thumbnail(url=thumbnail)
 
         em_other = discord.Embed(
             title=f'Misc Statistics for {player_name}',
-            description=f'[{player_name}\'s profile](https://ddnet.tw/players/{player_name})',
+            description=f'[`{player_name}\'s Profile`]({player_url})',
             timestamp=datetime.now()
         )
 
         em_other.add_field(name='Joined DDNet:', value=f'{ff_date}')
         em_other.add_field(name='DDBirthday:', value=f'{bday}')
-        em_other.add_field(name='\u200B', value='\u200B', inline=False) # Invisible Field
-        em_other.add_field(name='Favorite Partners:', value=f'NAME1\nNAME2\nNAME3')
-        em_other.add_field(name='Last Seen:', value=f'NAME, playing MAP at DATE',)
+
+        em_other.add_field(name='Favorite Partners:', value=f'''
+        
+        1. [`{li_fp_names[0]}`](https://ddnet.tw/players/{li_fp_names[0]}) with `{li_fp_finishes[0]}` finishes.
+        2. [`{li_fp_names[1]}`](https://ddnet.tw/players/{li_fp_names[1]}) with `{li_fp_finishes[1]}` finishes.
+        3. [`{li_fp_names[2]}`](https://ddnet.tw/players/{li_fp_names[2]}) with `{li_fp_finishes[2]}` finishes.
+        
+        ''', inline=False)
+
+        em_other.add_field(name='Last Seen:', value=f'''
+        
+        [[`{li_lf_type[0]}`]({types[li_lf_type[0]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[0]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[0])}) {li_lf_ts[0]}
+        [[`{li_lf_type[1]}`]({types[li_lf_type[1]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[1]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[1])}) {li_lf_ts[1]}
+        [[`{li_lf_type[2]}`]({types[li_lf_type[2]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[2]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[2])}) {li_lf_ts[2]}
+
+
+        ''')
+
+        em_other.set_author(name=f'Reqeusted by {user.name}')
+        em_other.set_thumbnail(url=thumbnail)
 
         # Button/Dropdown Initiations. Buttons are for the 'pages', specifically in 'Map Statistics'.
         button1 = (Button(label='<<', style=discord.ButtonStyle.primary)) # Button 1 brings you to the FIRST page
@@ -213,8 +274,7 @@ class UserProfile(commands.Cog): # Cog initiation
             options=[
                 discord.SelectOption(
                     label='Map Statistics',
-                    description='Statistics related to maps and map difficulties',
-                    default=True
+                    description='Statistics related to maps and map difficulties'
                 ),
                 discord.SelectOption(
                     label='Point Statistics',
@@ -244,8 +304,8 @@ class UserProfile(commands.Cog): # Cog initiation
             em = 0
 
             em_map.title = f'{categories[em]} Map Statistics for {player_name}'
-            em_map.description = f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})'
-            em_map.timestamp = datetime.datetime.now()
+            em_map.description = f'[`{player_name}\'s Profile`]({player_url})'
+            em_map.timestamp = datetime.now()
             em_map.set_field_at(index=0, name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
             em_map.set_field_at(index=2, name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
             em_map.set_field_at(index=3, name='World Records:', value=f'{li_top1[em]}', inline=True)
@@ -266,8 +326,8 @@ class UserProfile(commands.Cog): # Cog initiation
             em -= 1
 
             em_map.title = f'{categories[em]} Map Statistics for {player_name}'
-            em_map.description = f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})'
-            em_map.timestamp = datetime.datetime.now()
+            em_map.description = f'[`{player_name}\'s Profile`]({player_url})'
+            em_map.timestamp = datetime.now()
             em_map.set_field_at(index=0, name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
             em_map.set_field_at(index=2, name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
             em_map.set_field_at(index=3, name='World Records:', value=f'{li_top1[em]}', inline=True)
@@ -288,8 +348,8 @@ class UserProfile(commands.Cog): # Cog initiation
             em += 1
 
             em_map.title = f'{categories[em]} Map Statistics for {player_name}'
-            em_map.description = f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})'
-            em_map.timestamp = datetime.datetime.now()
+            em_map.description = f'[`{player_name}\'s Profile`]({player_url})'
+            em_map.timestamp = datetime.now()
             em_map.set_field_at(index=0, name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
             em_map.set_field_at(index=2, name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
             em_map.set_field_at(index=3, name='World Records:', value=f'{li_top1[em]}', inline=True)
@@ -306,13 +366,14 @@ class UserProfile(commands.Cog): # Cog initiation
             em = 9
 
             em_map.title = f'{categories[em]} Map Statistics for {player_name}'
-            em_map.description = f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})'
-            em_map.timestamp = datetime.datetime.now()
+            em_map.description = f'[`{player_name}\'s Profile`]({player_url})'
+            em_map.timestamp = datetime.now()
             em_map.set_field_at(index=0, name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
             em_map.set_field_at(index=2, name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
             em_map.set_field_at(index=3, name='World Records:', value=f'{li_top1[em]}', inline=True)
 
             await interaction.response.edit_message(embed=em_map, view=view)
+
         async def dropdown_callback(interaction): # Changes what type of statistic the user sees.
             if dropdown.values[0] == 'Map Statistics':
                 global em
@@ -324,8 +385,8 @@ class UserProfile(commands.Cog): # Cog initiation
                 em = 0
 
                 em_map.title = f'{categories[em]} Map Statistics for {player_name}'
-                em_map.description = f'[{player_name}\'s Profile](https://ddnet.tw/players/{player_name})'
-                em_map.timestamp = datetime.datetime.now()
+                em_map.description = f'[`{player_name}\'s Profile`]({player_url})'
+                em_map.timestamp = datetime.now()
                 em_map.set_field_at(index=0, name=f'{categories[em]} Maps Completed:', value=f'{li_maps_fin[em]}/{li_map_total[em]}', inline=False)
                 em_map.set_field_at(index=2, name='Global Top 5s:', value=f'{li_top5[em]}', inline=True)
                 em_map.set_field_at(index=3, name='World Records:', value=f'{li_top1[em]}', inline=True)
@@ -338,11 +399,14 @@ class UserProfile(commands.Cog): # Cog initiation
                 button3.disabled = True
                 button4.disabled = True
 
+                await interaction.response.edit_message(embed=em_point, view=view)
+
             if dropdown.values[0] == 'Other Statistics':
                 button1.disabled = True
                 button2.disabled = True
                 button3.disabled = True
                 button4.disabled = True
+
                 await interaction.response.edit_message(embed=em_other, view=view)
 
         # Callbacks for the Buttons/Dropdown
