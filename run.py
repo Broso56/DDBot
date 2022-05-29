@@ -18,17 +18,18 @@ async def on_ready():
     current_time = psttime.strftime('%I:%M %p PST.')
     print(f"READY: Bot readied at {current_time}")
 
-@client.command(name='reload', hidden=True)
+@client.tree.command(name='reload')
 @commands.is_owner()
-async def reload(ctx, extension):
-    await client.reload_extension(f"{extension}")
-    await ctx.send(f'{extension} reloaded!')
+async def reload(interaction: discord.Interaction, command: str):
+    await client.reload_extension(f"{command}")
+    await interaction.response.send_message(f'{command} reloaded!', ephemeral=True)
 
 async def setup(): # Loading cogs from other files
 
     async with client:
         await client.load_extension('cmdprofile')
         await client.load_extension('cmdsync')
+        await client.load_extension('cmdmap')
         await client.start(token) # Client token. NEVER share this with anyone, as it gives them access to your bot.
 
 asyncio.run(setup())
