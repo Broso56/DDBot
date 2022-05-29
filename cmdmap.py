@@ -158,22 +158,22 @@ class UserMap(commands.Cog): # Cog initiation
             name='Top 5 Ranks:',
             value=
             f'''
-            1. [`{li_r_player[0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[0])}), `{li_r_time[0]}`
-            2. [`{li_r_player[1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[1])}), `{li_r_time[1]}`
-            3. [`{li_r_player[2]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[2])}), `{li_r_time[2]}`
-            4. [`{li_r_player[3]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[3])}), `{li_r_time[3]}`
-            5. [`{li_r_player[4]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[4])}), `{li_r_time[4]}`
+            `{li_r_rank[0]}.` [`{li_r_player[0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[0])}), `{li_r_time[0]}`
+            `{li_r_rank[1]}.` [`{li_r_player[1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[1])}), `{li_r_time[1]}`
+            `{li_r_rank[2]}.` [`{li_r_player[2]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[2])}), `{li_r_time[2]}`
+            `{li_r_rank[3]}.` [`{li_r_player[3]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[3])}), `{li_r_time[3]}`
+            `{li_r_rank[4]}.` [`{li_r_player[4]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[4])}), `{li_r_time[4]}`
             ''', inline=False
         )
         em.add_field(
             name='Top 5 Team Ranks:',
             value=
             f'''
-            1. [`{li_tr_players[0][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][0])}) & [`{li_tr_players[0][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][1])}), `{li_tr_time[0]}`
-            2. [`{li_tr_players[1][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][0])}) & [`{li_tr_players[1][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][1])}), `{li_tr_time[1]}`
-            3. [`{li_tr_players[2][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][0])}) & [`{li_tr_players[2][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][1])}), `{li_tr_time[2]}`
-            4. [`{li_tr_players[3][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][0])}) & [`{li_tr_players[3][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][1])}), `{li_tr_time[3]}`
-            5. [`{li_tr_players[4][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][0])}) & [`{li_tr_players[4][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][1])}), `{li_tr_time[4]}`
+            `{li_tr_rank[0]}.` [`{li_tr_players[0][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][0])}) & [`{li_tr_players[0][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][1])}), `{li_tr_time[0]}`
+            `{li_tr_rank[1]}.` [`{li_tr_players[1][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][0])}) & [`{li_tr_players[1][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][1])}), `{li_tr_time[1]}`
+            `{li_tr_rank[2]}.` [`{li_tr_players[2][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][0])}) & [`{li_tr_players[2][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][1])}), `{li_tr_time[2]}`
+            `{li_tr_rank[3]}.` [`{li_tr_players[3][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][0])}) & [`{li_tr_players[3][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][1])}), `{li_tr_time[3]}`
+            `{li_tr_rank[4]}.` [`{li_tr_players[4][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][0])}) & [`{li_tr_players[4][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][1])}), `{li_tr_time[4]}`
             ''', inline=False
         )
         em.set_author(name=f'Reqeusted by {user.name}')
