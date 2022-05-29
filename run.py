@@ -18,6 +18,12 @@ async def on_ready():
     current_time = psttime.strftime('%I:%M %p PST.')
     print(f"READY: Bot readied at {current_time}")
 
+@client.command(name='reload', hidden=True)
+@commands.is_owner()
+async def reload(ctx, extension):
+    await client.reload_extension(f"{extension}")
+    await ctx.send(f'{extension} reloaded!')
+
 async def setup(): # Loading cogs from other files
 
     async with client:
