@@ -65,7 +65,7 @@ def scrape():
 
 
     def RankStats():
-        global li_r_rank, li_r_player, li_r_time, li_r_timestamp, li_tr_rank, li_tr_players, li_tr_time, li_tr_timestamp
+        global li_r_rank, li_r_player, li_r_time, li_r_timestamp, li_r_url, li_tr_rank, li_tr_players, li_tr_time, li_tr_timestamp, li_tr_url
         team_ranks = data['team_ranks']
         ranks = data['ranks']
 
@@ -73,16 +73,20 @@ def scrape():
         li_r_player = []
         li_r_time = []
         li_r_timestamp = []
+        li_r_url = []
 
         li_tr_rank = []
         li_tr_players = []
         li_tr_time = []
         li_tr_timestamp = []
+        li_tr_url = []
 
         for r in ranks:
             r_rank = r['rank']
             r_player = r['player']
+            print(r_player)
             r_time = int(r['time'])
+            r_url = f'[`{r_player}`](https://ddnet.tw/players/{urllib.parse.quote(r_player)}),'
             r_timestamp = r['timestamp']
             r_timestamp = f'<t:{str(r_timestamp)[:-2]}:R>'
 
@@ -97,13 +101,15 @@ def scrape():
 
             li_r_rank.append(r_rank)
             li_r_player.append(r_player)
-            li_r_time.append(r_time)
+            li_r_time.append(f'`{r_time}`')
             li_r_timestamp.append(r_timestamp)
+            li_r_url.append(r_url)
 
         for tr in team_ranks:
             tr_rank = tr['rank']
             tr_players = tr['players']
             tr_time = int(tr['time'])
+            tr_url = [f'[`{tr_players[0]}`](https://ddnet.tw/players/{urllib.parse.quote(tr_players[0])}) &', f'[`{tr_players[1]}`](https://ddnet.tw/players/{urllib.parse.quote(tr_players[1])}),']
             tr_timestamp = tr['timestamp']
             tr_timestamp = f'<t:{str(tr_timestamp)[:-2]}:R>'
 
@@ -118,9 +124,29 @@ def scrape():
 
             li_tr_rank.append(tr_rank)
             li_tr_players.append(tr_players)
-            li_tr_time.append(tr_time)
+            li_tr_time.append(f'`{tr_time}`')
             li_tr_timestamp.append(tr_timestamp)
+            li_r_url.append(r_url)
+            li_tr_url.append(tr_url)
 
+        r_len = len(li_r_player)
+        tr_len = len(li_tr_players)
+
+        while 9 >= r_len:
+            li_r_player.append('')
+            li_r_rank.append('-')
+            li_r_time.append('')
+            li_r_url.append('')
+            r_len = len(li_r_player)
+
+        while 9 >= tr_len:
+            li_tr_players.append(['', ''])
+            li_tr_rank.append('-')
+            li_tr_time.append('')
+            li_tr_url.append(['', ''])
+            tr_len = len(li_tr_players)
+        
+        print(li_r_url)
     CoreStats()
     RankStats()
 
@@ -158,22 +184,22 @@ class UserMap(commands.Cog): # Cog initiation
             name='Top 5 Ranks:',
             value=
             f'''
-            `{li_r_rank[0]}.` [`{li_r_player[0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[0])}), `{li_r_time[0]}`
-            `{li_r_rank[1]}.` [`{li_r_player[1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[1])}), `{li_r_time[1]}`
-            `{li_r_rank[2]}.` [`{li_r_player[2]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[2])}), `{li_r_time[2]}`
-            `{li_r_rank[3]}.` [`{li_r_player[3]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[3])}), `{li_r_time[3]}`
-            `{li_r_rank[4]}.` [`{li_r_player[4]}`](https://ddnet.tw/players/{urllib.parse.quote(li_r_player[4])}), `{li_r_time[4]}`
+            `{li_r_rank[0]}.` {li_r_url[0]} {li_r_time[0]}
+            `{li_r_rank[1]}.` {li_r_url[1]} {li_r_time[1]}
+            `{li_r_rank[2]}.` {li_r_url[2]} {li_r_time[2]}
+            `{li_r_rank[3]}.` {li_r_url[3]} {li_r_time[3]}
+            `{li_r_rank[4]}.` {li_r_url[4]} {li_r_time[4]}
             ''', inline=False
         )
         em.add_field(
             name='Top 5 Team Ranks:',
             value=
             f'''
-            `{li_tr_rank[0]}.` [`{li_tr_players[0][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][0])}) & [`{li_tr_players[0][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[0][1])}), `{li_tr_time[0]}`
-            `{li_tr_rank[1]}.` [`{li_tr_players[1][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][0])}) & [`{li_tr_players[1][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[1][1])}), `{li_tr_time[1]}`
-            `{li_tr_rank[2]}.` [`{li_tr_players[2][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][0])}) & [`{li_tr_players[2][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[2][1])}), `{li_tr_time[2]}`
-            `{li_tr_rank[3]}.` [`{li_tr_players[3][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][0])}) & [`{li_tr_players[3][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[3][1])}), `{li_tr_time[3]}`
-            `{li_tr_rank[4]}.` [`{li_tr_players[4][0]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][0])}) & [`{li_tr_players[4][1]}`](https://ddnet.tw/players/{urllib.parse.quote(li_tr_players[4][1])}), `{li_tr_time[4]}`
+            `{li_tr_rank[0]}.` {li_tr_url[0][0]} {li_tr_url[0][1]} {li_tr_time[0]}
+            `{li_tr_rank[1]}.` {li_tr_url[1][0]} {li_tr_url[1][1]} {li_tr_time[1]}
+            `{li_tr_rank[2]}.` {li_tr_url[2][0]} {li_tr_url[2][1]} {li_tr_time[2]}
+            `{li_tr_rank[3]}.` {li_tr_url[3][0]} {li_tr_url[3][1]} {li_tr_time[3]}
+            `{li_tr_rank[4]}.` {li_tr_url[4][0]} {li_tr_url[4][1]} {li_tr_time[4]}
             ''', inline=False
         )
         em.set_author(name=f'Reqeusted by {user.name}')
