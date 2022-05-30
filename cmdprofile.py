@@ -13,14 +13,13 @@ intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 
 
-def scrape(): # Web Scrapes + Sorts Data
+def scrape(player_name): # Web Scrapes + Sorts Data
     global data
     player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
     url = f'https://ddnet.tw/players/?json2={player_url}'
     data = requests.get(url).json()
 
     def PointStats():
-        global points_total, points_rank, points_lm, points_lw, pointavg_lm, pointavg_lw
 
         points_total = data['points']['points']
         points_rank = data['points']['rank']
@@ -33,8 +32,9 @@ def scrape(): # Web Scrapes + Sorts Data
         pointavg_lm = str(round(pointavg_lm, 0))[:-2]
         pointavg_lw = str(round(pointavg_lw, 0))[:-2]
 
+        return points_total, points_rank, points_lm, points_lw, pointavg_lm, pointavg_lw
+
     def FavoritePartner():
-        global li_fp_names, li_fp_finishes
 
         fp = data['favoritePartners'] # fp = Favorite Partner
         li_fp_names = []
@@ -54,8 +54,9 @@ def scrape(): # Web Scrapes + Sorts Data
         li_fp_names = li_fp_names[:-7]
         li_fp_finishes = li_fp_finishes[:-7]
 
+        return li_fp_names, li_fp_finishes
+
     def JoinDate():
-        global bday, ff_date
 
         # Bday Checker
         ff_date = data['first_finish']['timestamp']
@@ -81,9 +82,10 @@ def scrape(): # Web Scrapes + Sorts Data
         else:
             player_birthday = datetime.timestamp(player_birthday)
             bday = f'<t:{int(player_birthday)}:R>'
+        
+        return bday, ff_date
 
     def MapStats():
-        global categories, li_top5, li_top1, li_maps_fin, li_map_total
 
         li_top5 = []
         li_top1 = []
@@ -143,9 +145,10 @@ def scrape(): # Web Scrapes + Sorts Data
             li_top1.append(top1)
             li_maps_fin.append(maps_fin)
             li_map_total.append(map_total)
+        
+        return categories, li_top5, li_top1, li_maps_fin, li_map_total
 
     def LastSeen():
-        global li_lf_ts, li_lf_map, li_lf_type, types
         types = {
             'Novice' : 'https://ddnet.tw/ranks/novice/',
             'Moderate' : 'https://ddnet.tw/ranks/moderate/',
@@ -182,25 +185,55 @@ def scrape(): # Web Scrapes + Sorts Data
         li_lf_map = li_lf_map[:-7]
         li_lf_type = li_lf_type[:-7] 
 
-    PointStats()
-    MapStats()
-    FavoritePartner()
-    JoinDate()
-    LastSeen()
+        return li_lf_ts, li_lf_map, li_lf_type, types
 
+    point_stats = PointStats()
+    map_stats = MapStats()
+    favorite_partner = FavoritePartner()
+    join_date = JoinDate()
+    last_seen = LastSeen()
+    return point_stats, map_stats, favorite_partner, join_date, last_seen
 
 class UserProfile(commands.Cog): # Cog initiation
     def __init__(self, client):
         self.client = client
-
     @client.tree.command(name="profile", description='A summary for a DDNet profile.')
     async def profile(self, interaction: discord.Interaction, player: str):
-        global em, player_name
         user = interaction.user
         player_name = player
         player_url = f'https://ddnet.tw/players/{player_name}'
 
-        scrape()
+        stats = scrape(player_name)
+        point_stats = stats[0]
+        map_stats = stats[1]
+        favorite_partner = stats[2]
+        join_date = stats[3]
+        last_seen = stats[4]
+
+        points_total = point_stats[0]
+        points_rank = point_stats[1]
+        points_lm = point_stats[2]
+        points_lw = point_stats[3]
+        pointavg_lm = point_stats[4]
+        pointavg_lw = point_stats[5]
+
+        li_fp_names = favorite_partner[0]
+        li_fp_finishes = favorite_partner[1]
+
+        bday = join_date[0]
+        ff_date = join_date[1]
+
+        categories = map_stats[0]
+        li_top5 = map_stats[1]
+        li_top1 = map_stats[2]
+        li_maps_fin = map_stats[3]
+        li_map_total = map_stats[4]
+
+        li_lf_ts = last_seen[0]
+        li_lf_map = last_seen[1]
+        li_lf_type = last_seen[2]
+        types = last_seen[3]
+
         em = 0
         thumbnail = user.avatar # Avatar that appears in top right of embeds
 
@@ -290,11 +323,10 @@ class UserProfile(commands.Cog): # Cog initiation
         # Disabling first 2 buttons since it starts on page 1. No point in having a button to go back a page if you are on the first page
         button1.disabled = True
         button2.disabled = True
-
+        
         em = 0
-
         async def button1_callback(interaction): # Edits the embed to go to the FIRST page. Disables the 'back' buttons and Enables the 'forward' buttons.
-            global em
+            nonlocal em
             button1.disabled = True
             button2.disabled = True
             button3.disabled = False
@@ -312,8 +344,7 @@ class UserProfile(commands.Cog): # Cog initiation
             await interaction.response.edit_message(embed=em_map, view=view)
 
         async def button2_callback(interaction): # Edits the embed to go back one page. Checks if its on the FIRST page after, and if so, disable the 'back buttons'
-            global em
-
+            nonlocal em
             if em == 1:
                 button1.disabled = True
                 button2.disabled = True
@@ -334,8 +365,7 @@ class UserProfile(commands.Cog): # Cog initiation
             await interaction.response.edit_message(embed=em_map, view=view)
 
         async def button3_callback(interaction): # Edits the embed to go forward one page. Checks if its on the LAST page after, and if so, disable the 'forward' buttons
-            global em
-
+            nonlocal em
             if em == 8:
                 button3.disabled = True
                 button4.disabled = True
@@ -356,7 +386,7 @@ class UserProfile(commands.Cog): # Cog initiation
             await interaction.response.edit_message(embed=em_map, view=view)
 
         async def button4_callback(interaction): # Edits the embed to go to the LAST page. Disables the 'forward' buttons and Enables the 'back' buttons.
-            global em
+            nonlocal em
             button1.disabled = False
             button2.disabled = False
             button3.disabled = True
@@ -375,7 +405,7 @@ class UserProfile(commands.Cog): # Cog initiation
 
         async def dropdown_callback(interaction): # Changes what type of statistic the user sees.
             if dropdown.values[0] == 'Map Statistics':
-                global em
+                nonlocal em
                 button2.disabled = True
                 button1.disabled = True
                 button3.disabled = False
@@ -422,7 +452,7 @@ class UserProfile(commands.Cog): # Cog initiation
         view.add_item(button4)
         view.add_item(dropdown)
 
-        await interaction.response.send_message(embed=em_map, view=view)
+        await interaction.response.send_message(embed=em_map, view=view) 
         await asyncio.sleep(150.0) # Waits 2.5 Minutes, then deletes message to clear up spam.
         await interaction.delete_original_message()
 
