@@ -12,7 +12,6 @@ intents.members = True
 intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 
-
 def scrape(player_name): # Web Scrapes + Sorts Data
     global data
     player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
@@ -197,6 +196,7 @@ def scrape(player_name): # Web Scrapes + Sorts Data
 class UserProfile(commands.Cog): # Cog initiation
     def __init__(self, client):
         self.client = client
+        
     @client.tree.command(name="profile", description='A summary for a DDNet profile.')
     async def profile(self, interaction: discord.Interaction, player: str):
         user = interaction.user
