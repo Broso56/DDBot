@@ -1,33 +1,41 @@
 import discord
 from discord.ui import Button, View, Select
 from discord import app_commands
+from discord.app_commands import Choice
 from discord.ext import commands
 from datetime import datetime, timedelta
 import asyncio
 import requests # To connect to site
 import urllib.parse # To convert text to user encoded url (e.g a space is now '%20')
+import random
 
 intents = discord.Intents.default() # Required intent stuff
 intents.members = True
 intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
+tree = app_commands
 
-def scrape():
-    #TODO: Fix list index errors
-    global data
+def scrape(mapname):
     map_url = urllib.parse.quote(mapname) # Converts text to user encoded url
     url = f'https://ddnet.tw/maps/?json={map_url}'
     data = requests.get(url).json()
 
     def CoreStats():
+        nonlocal data
         global map_name, map_site, stars, map_img, type, mapper, release, median_time, first_finish, last_finish, finishes, finishers, dimensions, replay_rate, points
+        has_release = True
         map_name = data['name']
         map_site = data['website']
         stars = data['difficulty']
         map_img = data['thumbnail']
         type = data['type']
         mapper = data['mapper']
-        release = data['release']
+
+        try:
+            release = data['release']
+        except:
+            release = '`Unknown.`'
+            has_release = False
         median_time = int(data['median_time'])
         first_finish = data['first_finish']
         last_finish = data['last_finish']
@@ -36,7 +44,8 @@ def scrape():
         dimensions = data['width'], data['height']
         points = data['points']
 
-        release = f'<t:{str(release)[:-2]}:R>'
+        if has_release:
+            release = f'<t:{str(release)[:-2]}:R>'
 
         hour = False
         if median_time >= 3600:
@@ -63,8 +72,8 @@ def scrape():
 
         stars = ''.join([str(item) for item in stars])
 
-
     def RankStats():
+        nonlocal data
         global li_r_rank, li_r_player, li_r_time, li_r_timestamp, li_r_url, li_tr_rank, li_tr_players, li_tr_time, li_tr_timestamp, li_tr_url
         team_ranks = data['team_ranks']
         ranks = data['ranks']
@@ -84,7 +93,6 @@ def scrape():
         for r in ranks:
             r_rank = r['rank']
             r_player = r['player']
-            print(r_player)
             r_time = int(r['time'])
             r_url = f'[`{r_player}`](https://ddnet.tw/players/{urllib.parse.quote(r_player)}),'
             r_timestamp = r['timestamp']
@@ -145,24 +153,119 @@ def scrape():
             li_tr_time.append('')
             li_tr_url.append(['', ''])
             tr_len = len(li_tr_players)
-        
-        print(li_r_url)
+
     CoreStats()
     RankStats()
 
+def map_random(category):
+    url = 'https://ddnet.tw/players/?json2=Broso56'
+    data = requests.get(url).json()
+    
+    def find_map(category):
+        nonlocal data
+        if category == 'All':
+            categories = [
+                'Novice',
+                'Moderate',
+                'Brutal',
+                'Insane',
+                'Dummy',
+                'DDMaX',
+                'Oldschool',
+                'Solo',
+                'Race',
+                'Fun'
+            ]
+            category = random.choice(categories)
+        cat = data['types'][category]
+        maps = cat['maps']
+        maps_name = []
 
+        for map in maps:
+            maps_name.append(map)
+
+        ran_map = random.choice(maps_name)
+        return(ran_map)
+
+    ran_map = find_map(category)
+
+    scrape(ran_map)
 class UserMap(commands.Cog): # Cog initiation
     def __init__(self, client):
         self.client = client
 
-    @client.tree.command(name="map", description='Searches for a map')
+    @tree.command(name='map', description='Searches for a map')
     async def map(self, interaction: discord.Interaction, map: str):
-        global mapname
-
         mapname = map
         user = interaction.user
 
-        scrape()
+        scrape(mapname)
+
+        thumbnail = user.avatar
+        em = discord.Embed(
+            title=f'{map_name}',
+            description=f'**By {mapper}**\n**{type}** {stars} **({points} Points)**',
+            url=f'{map_site}',
+            timestamp = datetime.now()
+        )
+
+        em.add_field(name='Released:', value=release, inline=False)
+        em.add_field(name='\u200B', value=
+        f'''
+        Finished: `{finishers}`, Total Finishes: `{finishes}`
+        Replay Rate: `{replay_rate}`
+        Median Time: `{median_time}`
+        ''', inline=False
+        )
+        em.add_field(
+            name='Top 5 Ranks:',
+            value=
+            f'''
+            `{li_r_rank[0]}.` {li_r_url[0]} {li_r_time[0]}
+            `{li_r_rank[1]}.` {li_r_url[1]} {li_r_time[1]}
+            `{li_r_rank[2]}.` {li_r_url[2]} {li_r_time[2]}
+            `{li_r_rank[3]}.` {li_r_url[3]} {li_r_time[3]}
+            `{li_r_rank[4]}.` {li_r_url[4]} {li_r_time[4]}
+            ''', inline=False
+        )
+        em.add_field(
+            name='Top 5 Team Ranks:',
+            value=
+            f'''
+            `{li_tr_rank[0]}.` {li_tr_url[0][0]} {li_tr_url[0][1]} {li_tr_time[0]}
+            `{li_tr_rank[1]}.` {li_tr_url[1][0]} {li_tr_url[1][1]} {li_tr_time[1]}
+            `{li_tr_rank[2]}.` {li_tr_url[2][0]} {li_tr_url[2][1]} {li_tr_time[2]}
+            `{li_tr_rank[3]}.` {li_tr_url[3][0]} {li_tr_url[3][1]} {li_tr_time[3]}
+            `{li_tr_rank[4]}.` {li_tr_url[4][0]} {li_tr_url[4][1]} {li_tr_time[4]}
+            ''', inline=False
+        )
+        em.set_author(name=f'Reqeusted by {user.name}')
+        em.set_thumbnail(url=thumbnail)
+        em.set_image(url=f'{map_img}')
+        
+        await interaction.response.send_message(embed=em)
+        await asyncio.sleep(150.0) # Waits 2.5 Minutes, then deletes message to clear up spam.
+        await interaction.delete_original_message()
+
+    @tree.command(name='maprandom', description='Searches for a random map')
+    @tree.choices(
+        category=[
+            Choice(name='All', value= 'All'),
+            Choice(name='Novice', value='Novice'),
+            Choice(name='Moderate', value='Moderate'),
+            Choice(name='Brutal', value='Brutal'),
+            Choice(name='Insane', value='Insane'),
+            Choice(name='Dummy', value='Dummy'),
+            Choice(name='DDMaX', value='DDMaX'),
+            Choice(name='Oldschool', value='Oldschool'),
+            Choice(name='Solo', value='Solo'),
+            Choice(name='Race', value='Race'),
+            Choice(name='Fun', value='Fun')
+        ]
+    )
+    async def maprandom(self, interaction: discord.Interaction, category: Choice[str]):
+        user = interaction.user
+        map_random(category.value)
 
         thumbnail = user.avatar
         em = discord.Embed(
