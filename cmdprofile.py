@@ -154,7 +154,7 @@ def scrape(player_name): # Web Scrapes + Sorts Data
             'Brutal' : 'https://ddnet.tw/ranks/brutal/',
             'Insane' : 'https://ddnet.tw/ranks/insane/',
             'Dummy' : 'https://ddnet.tw/ranks/dummy/',
-            'DDMaX' : 'https://ddnet.tw/ranks/ddmax/',
+            'DDmaX' : 'https://ddnet.tw/ranks/ddmax/',
             'Oldschool' : 'https://ddnet.tw/ranks/oldschool/',
             'Solo' : 'https://ddnet.tw/ranks/solo/',
             'Race' : 'https://ddnet.tw/ranks/race/',

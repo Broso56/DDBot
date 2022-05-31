@@ -256,7 +256,7 @@ class UserMap(commands.Cog): # Cog initiation
             Choice(name='Brutal', value='Brutal'),
             Choice(name='Insane', value='Insane'),
             Choice(name='Dummy', value='Dummy'),
-            Choice(name='DDMaX', value='DDMaX'),
+            Choice(name='DDmaX', value='DDmaX'),
             Choice(name='Oldschool', value='Oldschool'),
             Choice(name='Solo', value='Solo'),
             Choice(name='Race', value='Race'),
