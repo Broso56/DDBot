@@ -25,7 +25,7 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Send Messages
     - Manage Messages
     - Use Slash Commands
-    - NOTE: You might have to add more if this becomes outdated. Keep in mind the intents/scopes/perms if the bot errors.
+    - **NOTE: You might have to add more if this becomes outdated. Keep in mind the intents/scopes/perms if the bot errors.**
 
 - **Intents**
     - Presence Intent
