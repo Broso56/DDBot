@@ -31,4 +31,4 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Presence Intent
     - Server Members Intent
     - Message Content Intent
-    - **NOTE:once the bot reaches 100 or more servers, all intents will require verification and approval. (Except message until Aug 31.)**
+    - **NOTE: Once the bot reaches 100 or more servers, all intents will require verification and approval. (Except message until Aug 31.)**
