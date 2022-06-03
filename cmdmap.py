@@ -16,9 +16,14 @@ client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=Tr
 tree = app_commands
 
 def scrape(mapname):
+    scrape.map_exists = True
     map_url = urllib.parse.quote(mapname) # Converts text to user encoded url
     url = f'https://ddnet.tw/maps/?json={map_url}'
     data = requests.get(url).json()
+    if str(data) == '{}':
+        scrape.map_exists = False
+        return
+        
 
     def CoreStats():
         nonlocal data
@@ -391,7 +396,9 @@ class UserMap(commands.Cog): # Cog initiation
         user = interaction.user
 
         scrape(mapname)
-
+        if not scrape.map_exists:
+            await interaction.response.send_message(f'```arm\nERROR: M\u200bap \'{map}\' does not exist.\n```', ephemeral=True) # Invis character is so that 'Map' doesnt get highlighted in red.
+            return
         thumbnail = user.avatar
         em = discord.Embed(
             title=f'{map_name}',
