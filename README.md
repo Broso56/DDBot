@@ -5,9 +5,9 @@ Fairly new to coding so don't expect it to be clean code
 
 If you have any ideas or have any bugs to report feel free to do so.
 You can also directly contact me on discord (Broso56#5656), however my DM's are limited to friends only so you will have to try and add me first.
-                                                                                                                                            ^ I'd suggest being in a ddnet-related server that im also in. Otherwise I might mistake you for some random person or bot.
+                                            ^ I'd suggest being in a ddnet-related server that I'm also in. Otherwise I might mistake you for some random person or bot.
 
-How to set up the bot:
+#Bot Setup Tutorial
 - Follow instructions for making a bot profile
 - Create file 'clienttoken.py' with 'token = YOUR_TOKEN'
 - Download files
