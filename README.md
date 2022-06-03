@@ -9,7 +9,7 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
 
 How to set up the bot:
 - Follow instructions for making a bot profile
-- Create file 'clienttoken.py' with 'token = <your client token>'
+- Create file 'clienttoken.py' with 'token = YOUR_TOKEN'
 - Download files
 - Select needed scopes & permissions
 - run 'run.py'
