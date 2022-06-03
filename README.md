@@ -25,4 +25,9 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Use Slash Commands
     - NOTE: You might have to add more if this becomes outdated. Keep in mind the intents/scopes/perms if the bot errors.
 
+- **Intents**
+    - Presence Intent
+    - Server Members Intent
+    - Message Content Intent
+    - **NOTE:once the bot reaches 100 or more servers, all intents will require verification and approval. (Except message until Aug 31.)**
 NOTE: I have not personally tested this, but in theory this should work. Sorry in advance if it doesnt however, and feel free to contact me if need be.
