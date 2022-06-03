@@ -15,11 +15,11 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Select needed scopes & permissions
     - run 'run.py'
 
-- Scopes:
+- **Scopes**:
     - bot
     - applications.commands
 
-- Bot Permissions
+- **Bot Permissions**
     - Send Messages
     - Manage Messages
     - Use Slash Commands
