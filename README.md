@@ -8,11 +8,12 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
                                             ^ I'd suggest being in a ddnet-related server that I'm also in. Otherwise I might mistake you for some random person or bot.
 
 # Bot Setup Tutorial
-- Follow instructions for making a bot profile
-- Create file 'clienttoken.py' with 'token = YOUR_TOKEN'
-- Download files
-- Select needed scopes & permissions
-- run 'run.py'
+    - Follow instructions for making a bot profile
+    - Create file 'clienttoken.py' with 'token = YOUR_TOKEN'
+    - Download files needed
+    - Download imports needed
+    - Select needed scopes & permissions
+    - run 'run.py'
 
 - Scopes:
     - bot
