@@ -253,7 +253,7 @@ class UserProfile(commands.Cog): # Cog initiation
             li_lf = last_seen
             lf_len = len(li_lf)
         else:
-            await interaction.response.send_message('```arm\nERROR: Player does not exist.\n```', ephemeral=True)
+            await interaction.response.send_message(f'```arm\nERROR: Player \'{player}\' does not exist.\n```', ephemeral=True)
             return
 
         em = 0
