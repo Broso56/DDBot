@@ -12,35 +12,45 @@ intents.members = True
 intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 
-def scrape(player_name): # Web Scrapes + Sorts Data
+def scrape(player_name): # Web Scrapes + Sorts Data for message
     global data
-    player_url = urllib.parse.quote(player_name) # Converts text to user encoded url
+    scrape.player_exists = True
+    player_url = urllib.parse.quote(player_name)
     url = f'https://ddnet.tw/players/?json2={player_url}'
     data = requests.get(url).json()
+    if str(data) == '{}':
+        scrape.player_exists = False
+        return
 
     def PointStats():
-
-        points_total = data['points']['points']
-        points_rank = data['points']['rank']
-        points_lm = data['points_last_month']['points'] # lm = last month
-        points_lw = data['points_last_week']['points'] # lw = last week
-        pointavg_lm = points_lm / 30
-        pointavg_lw = points_lw / 7
+        no_points = False
+        points_rank = data['points']['rank'] 
+            
+        try: # To avoid erroring when a player has no points
+            points_total = data['points']['points']
+            points_lm = data['points_last_month']['points'] # lm = last month
+            points_lw = data['points_last_week']['points'] # lw = last week
+            pointavg_lm = points_lm / 30
+            pointavg_lw = points_lw / 7
+        except KeyError:
+            points_total, points_lm, points_lw, pointavg_lm, pointavg_lw = 0, 0, 0, 0, 0
+            no_points = True
     
-        # Rounds the decimals to full number // Removes the last 2 numbers (e.g So it shows as 1 instead of 1.0 cause it does that for some reason)
-        pointavg_lm = str(round(pointavg_lm, 0))[:-2]
-        pointavg_lw = str(round(pointavg_lw, 0))[:-2]
+        # Rounds numbers for better readability
+        if not no_points:
+            pointavg_lm = str(round(pointavg_lm, 0))[:-2]
+            pointavg_lw = str(round(pointavg_lw, 0))[:-2]
 
         return points_total, points_rank, points_lm, points_lw, pointavg_lm, pointavg_lw
 
     def FavoritePartner():
-
         fp = data['favoritePartners'] # fp = Favorite Partner
+        li_fp = []
         li_fp_names = []
         li_fp_finishes = []
         i = 0
 
-        for p in fp:
+        for __p__ in fp:
 
             fp_name = fp[i]['name']
             fp_finishes = fp[i]['finishes']
@@ -50,10 +60,15 @@ def scrape(player_name): # Web Scrapes + Sorts Data
 
             i += 1
 
-        li_fp_names = li_fp_names[:-7]
-        li_fp_finishes = li_fp_finishes[:-7]
+        i = 0
+        if li_fp_names != []:
+            for __element__ in li_fp_names:
+                li_fp.append(f'{i+1}. [`{li_fp_names[i]}`](https://ddnet.tw/players/{urllib.parse.quote(li_fp_names[i])}) with `{li_fp_finishes[i]}` finishes')
+                i += 1
 
-        return li_fp_names, li_fp_finishes
+        li_fp = li_fp[:3]
+
+        return li_fp
 
     def JoinDate():
 
@@ -160,13 +175,15 @@ def scrape(player_name): # Web Scrapes + Sorts Data
             'Race' : 'https://ddnet.tw/ranks/race/',
             'Fun' : 'https://ddnet.tw/ranks/fun/',
         }
+
         lf = data['last_finishes'] # lf = Last Finishes
         li_lf_ts = []
         li_lf_map = []
         li_lf_type = []
+        li_lf = []
 
         i = 0
-        for f in lf:
+        for __f__ in lf:
 
             lf_ts = lf[i]['timestamp'] # ts = timestamp
             lf_map = lf[i]['map']
@@ -179,12 +196,15 @@ def scrape(player_name): # Web Scrapes + Sorts Data
             li_lf_type.append(lf_type)
 
             i += 1
+        i = 0
+        if li_lf_map != []:
+            for __element__ in li_lf_map:
+                li_lf.append(f'[[`{li_lf_type[i]}`]({types[li_lf_type[i]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[i]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[i])}) {li_lf_ts[i]}')
+                i += 1
 
-        li_lf_ts = li_lf_ts[:-7]
-        li_lf_map = li_lf_map[:-7]
-        li_lf_type = li_lf_type[:-7] 
+        return li_lf
 
-        return li_lf_ts, li_lf_map, li_lf_type, types
+
 
     point_stats = PointStats()
     map_stats = MapStats()
@@ -202,37 +222,39 @@ class UserProfile(commands.Cog): # Cog initiation
         user = interaction.user
         player_name = player
         player_url = f'https://ddnet.tw/players/{player_name}'
-
         stats = scrape(player_name)
-        point_stats = stats[0]
-        map_stats = stats[1]
-        favorite_partner = stats[2]
-        join_date = stats[3]
-        last_seen = stats[4]
+        player_exists = scrape.player_exists
+        if player_exists:
+            point_stats = stats[0]
+            map_stats = stats[1]
+            favorite_partner = stats[2]
+            join_date = stats[3]
+            last_seen = stats[4]
 
-        points_total = point_stats[0]
-        points_rank = point_stats[1]
-        points_lm = point_stats[2]
-        points_lw = point_stats[3]
-        pointavg_lm = point_stats[4]
-        pointavg_lw = point_stats[5]
+            points_total = point_stats[0]
+            points_rank = point_stats[1]
+            points_lm = point_stats[2]
+            points_lw = point_stats[3]
+            pointavg_lm = point_stats[4]
+            pointavg_lw = point_stats[5]
 
-        li_fp_names = favorite_partner[0]
-        li_fp_finishes = favorite_partner[1]
+            li_fp = favorite_partner
+            fp_len = len(li_fp)
 
-        bday = join_date[0]
-        ff_date = join_date[1]
+            bday = join_date[0]
+            ff_date = join_date[1]
 
-        categories = map_stats[0]
-        li_top5 = map_stats[1]
-        li_top1 = map_stats[2]
-        li_maps_fin = map_stats[3]
-        li_map_total = map_stats[4]
+            categories = map_stats[0]
+            li_top5 = map_stats[1]
+            li_top1 = map_stats[2]
+            li_maps_fin = map_stats[3]
+            li_map_total = map_stats[4]
 
-        li_lf_ts = last_seen[0]
-        li_lf_map = last_seen[1]
-        li_lf_type = last_seen[2]
-        types = last_seen[3]
+            li_lf = last_seen
+            lf_len = len(li_lf)
+        else:
+            await interaction.response.send_message('```arm\nERROR: Player does not exist.\n```', ephemeral=True)
+            return
 
         em = 0
         thumbnail = user.avatar # Avatar that appears in top right of embeds
@@ -277,20 +299,15 @@ class UserProfile(commands.Cog): # Cog initiation
         em_other.add_field(name='DDBirthday:', value=f'{bday}')
 
         em_other.add_field(name='Favorite Partners:', value=f'''
-        
-        1. [`{li_fp_names[0]}`](https://ddnet.tw/players/{li_fp_names[0]}) with `{li_fp_finishes[0]}` finishes.
-        2. [`{li_fp_names[1]}`](https://ddnet.tw/players/{li_fp_names[1]}) with `{li_fp_finishes[1]}` finishes.
-        3. [`{li_fp_names[2]}`](https://ddnet.tw/players/{li_fp_names[2]}) with `{li_fp_finishes[2]}` finishes.
-        
+        {li_fp[0] if fp_len >= 1 else 'None'}
+        {li_fp[1] if fp_len >= 2 else ''}
+        {li_fp[2] if fp_len >= 3 else ''}
         ''', inline=False)
 
         em_other.add_field(name='Last Seen:', value=f'''
-        
-        [[`{li_lf_type[0]}`]({types[li_lf_type[0]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[0]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[0])}) {li_lf_ts[0]}
-        [[`{li_lf_type[1]}`]({types[li_lf_type[1]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[1]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[1])}) {li_lf_ts[1]}
-        [[`{li_lf_type[2]}`]({types[li_lf_type[2]]})] [`{player_name}`]({player_url}), playing [`{li_lf_map[2]}`](https://ddnet.tw/maps/{urllib.parse.quote(li_lf_map[2])}) {li_lf_ts[2]}
-
-
+        {li_lf[0] if lf_len >= 1 else 'Never'}
+        {li_lf[1] if lf_len >= 2 else ''}
+        {li_lf[2] if lf_len >= 3 else ''}
         ''')
 
         em_other.set_author(name=f'Reqeusted by {user.name}')
