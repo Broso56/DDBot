@@ -15,6 +15,8 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Select needed scopes & permissions
     - run 'run.py'
 
+    NOTE: I have not personally tested this, but in theory this should work. Sorry in advance if it doesnt however, and feel free to contact me if need be.
+
 - **Scopes**:
     - bot
     - applications.commands
@@ -30,4 +32,3 @@ You can also directly contact me on discord (Broso56#5656), however my DM's are 
     - Server Members Intent
     - Message Content Intent
     - **NOTE:once the bot reaches 100 or more servers, all intents will require verification and approval. (Except message until Aug 31.)**
-NOTE: I have not personally tested this, but in theory this should work. Sorry in advance if it doesnt however, and feel free to contact me if need be.
