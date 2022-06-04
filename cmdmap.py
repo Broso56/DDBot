@@ -8,6 +8,7 @@ import asyncio
 import requests # To connect to site
 import urllib.parse # To convert text to user encoded url (e.g a space is now '%20')
 import random
+import json
 
 intents = discord.Intents.default() # Required intent stuff
 intents.members = True
@@ -399,7 +400,9 @@ class UserMap(commands.Cog): # Cog initiation
         if not scrape.map_exists:
             await interaction.response.send_message(f'```arm\nERROR: M\u200bap \'{map}\' does not exist.\n```', ephemeral=True) # Invis character is so that 'Map' doesnt get highlighted in red.
             return
+
         thumbnail = user.avatar
+
         em = discord.Embed(
             title=f'{map_name}',
             description=f'**By {mapper}**\n**{type}** {stars} **({points} Points)**',
