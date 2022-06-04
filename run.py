@@ -26,7 +26,8 @@ async def on_ready():
     command=[
             Choice(name='Profile', value='profile'),
             Choice(name='Map', value='map'),
-            Choice(name='Sync', value='sync')
+            Choice(name='Sync', value='sync'),
+            Choice(name='Link', value='link')
         ]
 )
 @commands.is_owner()
@@ -40,6 +41,7 @@ async def setup(): # Loading cogs from other files
         await client.load_extension('cmdprofile')
         await client.load_extension('cmdsync')
         await client.load_extension('cmdmap')
+        await client.load_extension('cmdlink')
         await client.start(token) # Client token. NEVER share this with anyone, as it gives them access to your bot.
 
 asyncio.run(setup())
